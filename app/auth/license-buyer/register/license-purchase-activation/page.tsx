@@ -1,0 +1,168 @@
+"use client";
+import React, { useState } from "react";
+import { Upload } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+const LicenseBuyerAuthRegisterLicensePurchaseActivationPage = () => {
+  const router = useRouter();
+  const [files, setFiles] = useState({
+    dokumenBilling: null as File | null,
+    dokumenPajak: null as File | null,
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0] || null;
+    setFiles(prev => ({ ...prev, [fieldName]: file }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log("Document submission:", files);
+    // Navigate to success page
+    router.push("/auth/license-buyer/register/registration-success");
+  };
+
+  const FileUploadField = ({ 
+    id, 
+    label, 
+    required = false, 
+    description, 
+    file 
+  }: {
+    id: string;
+    label: string;
+    required?: boolean;
+    description: string;
+    file: File | null;
+  }) => (
+    <div>
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-gray-700 mb-2"
+      >
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      <div className="relative">
+        <input
+          type="file"
+          id={id}
+          name={id}
+          onChange={(e) => handleFileChange(e, id)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          required={required}
+        />
+        <div className="w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 transition-colors cursor-pointer">
+          <div className="flex flex-col items-center justify-center text-center">
+            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+            {file ? (
+              <div>
+                <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                <p className="text-xs text-gray-500">Klik untuk mengganti file</p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm font-medium text-gray-700">Klik untuk upload file</p>
+                <p className="text-xs text-gray-500">PDF, DOC, JPG, PNG (Max 10MB)</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <p className="text-xs text-gray-500 mt-1">{description}</p>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Card Container */}
+        <div className="bg-white rounded-xl">
+          {/* Step Indicator */}
+          <div className="p-5 border-b border-gray-200">
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  ✓
+                </div>
+                <div className="w-8 h-1 bg-primary"></div>
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  ✓
+                </div>
+                <div className="w-8 h-1 bg-primary"></div>
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-medium">
+                  3
+                </div>
+              </div>
+            </div>
+            <p className="text-center text-sm text-gray-600">Langkah 3 dari 3</p>
+          </div>
+
+          {/* Header */}
+          <div className="p-5">
+            <div className="flex items-center justify-center">
+              <h1 className="text-2xl justify-center font-semibold text-gray-900">
+                Aktivasi Pembelian Lisensi
+              </h1>
+            </div>
+          </div>
+
+          {/* Form Content */}
+          <div className="p-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Status Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <p className="text-sm font-medium text-gray-900 mb-1">
+                  Status Aktivasi Pembelian:
+                </p>
+                <p className="text-sm text-blue-700 font-medium">Pending</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  Status akan berubah menjadi aktif setelah verifikasi selesai
+                </p>
+              </div>
+
+              {/* Dokumen Billing */}
+              <FileUploadField
+                id="dokumenBilling"
+                label="Dokumen Billing"
+                required={false}
+                description="Dokumen legal untuk kontrak"
+                file={files.dokumenBilling}
+              />
+
+              {/* Dokumen Pajak */}
+              <FileUploadField
+                id="dokumenPajak"
+                label="Dokumen Pajak"
+                required={false}
+                description="NPWP perusahaan"
+                file={files.dokumenPajak}
+              />
+
+              {/* Tombol Selesai */}
+              <Link
+                href="/auth/license-buyer/register/registration-success"
+                className="block w-full p-3 bg-primary text-white rounded-xl font-medium shadow-sm hover:bg-primary transition-all duration-200 text-center"
+              >
+                Selesaikan Pendaftaran
+              </Link>
+            </form>
+
+            {/* Navigation */}
+            <div className="mt-6 text-center">
+              <Link
+                href="/auth/license-buyer/register/company-profile"
+                className="inline-block px-6 py-2.5 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200"
+              >
+                Kembali
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default LicenseBuyerAuthRegisterLicensePurchaseActivationPage;

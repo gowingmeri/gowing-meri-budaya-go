@@ -1,6 +1,6 @@
 {
-  "name": "gowing-meri-budaya-go",
-  "version": "0.1.0",
+  "name": "lumbung-rupa",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
