@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import { products, Product } from "@/data/product";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft, ShoppingCart, Heart, Share2, Tag } from "lucide-react";
 
-const DetailProductPage = () => {
+const DetailProductContent = () => {
   const searchParams = useSearchParams();
   const productId = searchParams.get('id');
   const [product, setProduct] = useState<Product | null>(null);
@@ -384,6 +384,21 @@ const DetailProductPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const DetailProductPage = () => {
+  return (
+    <Suspense fallback={
+      <div>
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-xl text-gray-600">Memuat produk...</p>
+        </div>
+      </div>
+    }>
+      <DetailProductContent />
+    </Suspense>
   );
 };
 

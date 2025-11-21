@@ -1,6 +1,6 @@
 "use client";
 export const dynamic = "force-dynamic";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -8,7 +8,7 @@ import { products, Product } from "@/data/product";
 import Navbar from "@/components/Navbar";
 import { ArrowLeft } from "lucide-react";
 
-const ProductPage = () => {
+const ProductContent = () => {
   const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -178,6 +178,21 @@ const ProductPage = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const ProductPage = () => {
+  return (
+    <Suspense fallback={
+      <div>
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-xl text-gray-600">Memuat produk...</p>
+        </div>
+      </div>
+    }>
+      <ProductContent />
+    </Suspense>
   );
 };
 
