@@ -1,6 +1,33 @@
+"use client";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 const FAB = () => {
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkUserRole = () => {
+      const role = localStorage.getItem('roleUser');
+      setUserRole(role);
+      setIsLoading(false);
+    };
+
+    checkUserRole();
+    
+    // Listen for storage changes
+    window.addEventListener('storage', checkUserRole);
+    
+    return () => {
+      window.removeEventListener('storage', checkUserRole);
+    };
+  }, []);
+
+  // Don't show FAB if user is not logged in or still loading
+  if (isLoading || !userRole) {
+    return null;
+  }
+
   return (
     <Link 
       href="/rupagen-ai"

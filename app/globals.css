@@ -10,6 +10,7 @@
   --color-background: var(--background);
   --color-primary: var(--primary);
   --color-text: var(--foreground);
+  --color-white: #FFFFFF;
 }
 
 body {
