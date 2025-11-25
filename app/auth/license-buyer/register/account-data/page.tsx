@@ -21,9 +21,13 @@ const LicenseBuyerAuthRegisterAccountDataPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Account data submission:", formData);
-    // Navigate to next page
-    router.push("/auth/license-buyer/register/company-profile");
+    // save to localStorage so later steps can read
+    try {
+      localStorage.setItem('register_account_data', JSON.stringify(formData));
+    } catch (e) {
+      console.warn('storage error', e);
+    }
+    router.push('/auth/license-buyer/register/company-profile');
   };
 
   return (
@@ -157,12 +161,12 @@ const LicenseBuyerAuthRegisterAccountDataPage = () => {
               </div>
 
               {/* Tombol Selanjutnya */}
-              <Link
-                href="/auth/license-buyer/register/company-profile"
+              <button
+                type="submit"
                 className="block w-full p-5 bg-primary text-white rounded-full font-medium shadow-sm hover:bg-primary transition-all duration-200 text-center"
               >
                 Selanjutnya
-              </Link>
+              </button>
             </form>
 
             {/* Footer */}

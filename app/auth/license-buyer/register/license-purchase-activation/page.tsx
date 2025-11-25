@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Toast from '../../../../../components/Toast'
 
 const LicenseBuyerAuthRegisterLicensePurchaseActivationPage = () => {
   const router = useRouter();
@@ -16,11 +17,63 @@ const LicenseBuyerAuthRegisterLicensePurchaseActivationPage = () => {
     setFiles(prev => ({ ...prev, [fieldName]: file }));
   };
 
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Document submission:", files);
-    // Navigate to success page
-    router.push("/auth/license-buyer/register/registration-success");
+    (async () => {
+      try {
+        // gather previous steps data from localStorage
+        const accountRaw = localStorage.getItem('register_account_data')
+        const companyRaw = localStorage.getItem('register_company_profile')
+        const account = accountRaw ? JSON.parse(accountRaw) : {}
+        const company = companyRaw ? JSON.parse(companyRaw) : {}
+
+        const fd = new FormData()
+        // map fields to backend expected keys
+        if (account.email) fd.append('email', account.email)
+        if (account.kataSandi) fd.append('password', account.kataSandi)
+        if (account.namaLengkap) fd.append('fullName', account.namaLengkap)
+        if (account.nomorTelepon) fd.append('nomorTelepon', account.nomorTelepon)
+        fd.append('role', 'LICENSE_BUYER')
+        // companyProfile as JSON string
+        fd.append('companyProfile', JSON.stringify({
+          companyName: company.namaPerusahaan,
+          industry: company.jenisIndustri,
+          companyAddress: company.alamatPerusahaan,
+          companyWebsite: company.situsPerusahaan,
+          companyRegistrationNumber: company.nomorRegistrasiPerusahaan,
+        }))
+
+        // attach files if present
+        if (files.dokumenBilling) fd.append('dokumenBilling', files.dokumenBilling)
+        if (files.dokumenPajak) fd.append('dokumenPajak', files.dokumenPajak)
+
+        // optional upload folder
+        fd.append('uploadFolder', 'users')
+
+        const res = await fetch('/api/auth/register', { method: 'POST', body: fd })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ message: 'Unknown error' }))
+          alert('Gagal mendaftar: ' + (err.message || res.statusText))
+          return
+        }
+        const data = await res.json()
+        // cleanup
+        localStorage.removeItem('register_account_data')
+        localStorage.removeItem('register_company_profile')
+        // show toast then navigate to success
+        setToastMessage('Pendaftaran berhasil')
+        setShowToast(true)
+        setTimeout(() => {
+          router.push('/auth/license-buyer/register/registration-success')
+        }, 900)
+      } catch (err: any) {
+        console.error(err)
+        alert('Terjadi kesalahan saat mengirim data. Cek konsol untuk detail.')
+      }
+    })()
   };
 
   const FileUploadField = ({ 
@@ -110,7 +163,7 @@ const LicenseBuyerAuthRegisterLicensePurchaseActivationPage = () => {
 
           {/* Form Content */}
           <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Status Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
                 <p className="text-sm font-medium text-gray-900 mb-1">
@@ -141,12 +194,12 @@ const LicenseBuyerAuthRegisterLicensePurchaseActivationPage = () => {
               />
 
               {/* Tombol Selesai */}
-              <Link
-                href="/auth/license-buyer/register/registration-success"
+              <button
+                type="submit"
                 className="block w-full p-3 bg-primary text-white rounded-xl font-medium shadow-sm hover:bg-primary transition-all duration-200 text-center"
               >
                 Selesaikan Pendaftaran
-              </Link>
+              </button>
             </form>
 
             {/* Navigation */}
@@ -161,6 +214,7 @@ const LicenseBuyerAuthRegisterLicensePurchaseActivationPage = () => {
           </div>
         </div>
       </div>
+      {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
     </div>
   );
 };

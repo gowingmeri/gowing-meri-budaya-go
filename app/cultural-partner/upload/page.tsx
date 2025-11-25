@@ -56,8 +56,48 @@ const CulturalPartnerUploadPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Upload submission:", { formData, uploadedFiles });
-    router.push("/cultural-partner/dashboard");
+    (async () => {
+      try {
+        if (!uploadedFiles || uploadedFiles.length === 0) {
+          alert('Tidak ada file untuk diupload')
+          return
+        }
+
+        const stored = localStorage.getItem('user')
+        if (!stored) {
+          alert('Anda harus login sebelum mengupload aset')
+          router.push('/auth/cultural-partner/login')
+          return
+        }
+        const user = JSON.parse(stored)
+        const uploadedUrls: string[] = []
+
+        for (const file of uploadedFiles) {
+          const fd = new FormData()
+          fd.append('file', file)
+          fd.append('folder', `assets/${user.id}`)
+
+          const res = await fetch('/api/upload/cloudinary', { method: 'POST', body: fd })
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({ error: res.statusText }))
+            throw new Error(err.error || 'Upload gagal')
+          }
+          const data = await res.json()
+          if (data?.secure_url) uploadedUrls.push(data.secure_url)
+          else if (data?.secureUrl) uploadedUrls.push(data.secureUrl)
+        }
+
+        // TODO: create an asset record in backend. For now we store uploaded URLs to localStorage as a draft
+        localStorage.setItem('lastUploadedAssetUrls', JSON.stringify(uploadedUrls))
+
+        // show success and navigate to dashboard
+        alert('Upload berhasil')
+        router.push('/cultural-partner/dashboard')
+      } catch (err: any) {
+        console.error(err)
+        alert('Gagal mengupload file: ' + (err?.message || 'unknown'))
+      }
+    })()
   };
 
   const nextStep = () => {
@@ -136,7 +176,7 @@ const CulturalPartnerUploadPage = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="bg-white rounded-2xl border border-gray-200 p-6 lg:p-8">
               {/* Step 1: File Upload */}
               {currentStep === 1 && (

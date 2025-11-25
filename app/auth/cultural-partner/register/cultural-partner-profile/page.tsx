@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Upload } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Toast from '../../../../../components/Toast'
 
 const CulturalPartnerRegisterCulturalPartnerProfilePage = () => {
   const router = useRouter();
@@ -18,11 +19,76 @@ const CulturalPartnerRegisterCulturalPartnerProfilePage = () => {
     setFiles(prev => ({ ...prev, [fieldName]: file }));
   };
 
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Document submission:", files);
-    // Navigate to login page after completing registration
-    router.push("/auth/cultural-partner/login");
+
+    // client-side validation: ensure required file fields are present in state
+    if (!files.buktiKemitraanBudaya) {
+      alert('Bukti Kemitraan Budaya wajib diunggah')
+      return
+    }
+    if (!files.suratPernyataanIP) {
+      alert('Surat Pernyataan IP wajib diunggah')
+      return
+    }
+
+    (async () => {
+      try {
+        // Try to gather previous steps data from localStorage
+        const accountRaw = localStorage.getItem('register_account_data')
+        const assetRaw = localStorage.getItem('register_cultural_asset') || localStorage.getItem('register_company_profile')
+        const account = accountRaw ? JSON.parse(accountRaw) : {}
+        const asset = assetRaw ? JSON.parse(assetRaw) : {}
+
+        const fd = new FormData()
+        if (account.email) fd.append('email', account.email)
+        if (account.kataSandi) fd.append('password', account.kataSandi)
+        if (account.namaLengkap) fd.append('fullName', account.namaLengkap)
+        if (account.nomorTelepon) fd.append('nomorTelepon', account.nomorTelepon)
+        fd.append('role', 'CULTURAL_PARTNER')
+
+        // organization profile (server will normalize keys)
+        fd.append('companyProfile', JSON.stringify({
+          namaOrganisasi: asset.namaOrganisasi,
+          jenisOrganisasi: asset.jenisOrganisasi,
+          alamatOrganisasi: asset.alamatOrganisasi,
+          tautanPortofolio: asset.tautanPortofolio,
+        }))
+
+        // attach files if provided
+        if (files.buktiKemitraanBudaya) fd.append('buktiKemitraanBudaya', files.buktiKemitraanBudaya)
+        if (files.dokumenLegal) fd.append('dokumenLegal', files.dokumenLegal)
+        if (files.suratPernyataanIP) fd.append('suratPernyataanIP', files.suratPernyataanIP)
+        if (files.dokumenKYC) fd.append('dokumenKYC', files.dokumenKYC)
+
+        fd.append('uploadFolder', 'users')
+
+        const res = await fetch('/api/auth/register', { method: 'POST', body: fd })
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ message: 'Unknown error' }))
+          alert('Gagal mendaftar: ' + (err.message || res.statusText))
+          return
+        }
+
+        // cleanup
+        localStorage.removeItem('register_account_data')
+        localStorage.removeItem('register_cultural_asset')
+        localStorage.removeItem('register_company_profile')
+
+        // show toast then navigate to success page
+        setToastMessage('Pendaftaran berhasil')
+        setShowToast(true)
+        setTimeout(() => {
+          router.push('/auth/cultural-partner/register/registration-success')
+        }, 900)
+      } catch (err: any) {
+        console.error(err)
+        alert('Terjadi kesalahan saat mengirim data. Cek konsol untuk detail.')
+      }
+    })()
   };
 
   const FileUploadField = ({ 
@@ -112,7 +178,7 @@ const CulturalPartnerRegisterCulturalPartnerProfilePage = () => {
 
           {/* Form Content */}
           <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
               {/* Bukti Kemitraan Budaya */}
               <FileUploadField
                 id="buktiKemitraanBudaya"
@@ -150,12 +216,12 @@ const CulturalPartnerRegisterCulturalPartnerProfilePage = () => {
               />
 
               {/* Tombol Selesai */}
-              <Link
-                href="/auth/cultural-partner/register/registration-success"
+              <button
+                type="submit"
                 className="block w-full p-5 bg-primary text-white rounded-full font-medium shadow-sm hover:bg-primary transition-all duration-200 text-center"
               >
                 Selesaikan Pendaftaran
-              </Link>
+              </button>
             </form>
 
             {/* Navigation */}
@@ -170,6 +236,7 @@ const CulturalPartnerRegisterCulturalPartnerProfilePage = () => {
           </div>
         </div>
       </div>
+      {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
     </div>
   );
 };

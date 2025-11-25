@@ -55,6 +55,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('roleUser');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     localStorage.removeItem('lumbungRupa_cart');
     setUserRole(null);
     setCartItemCount(0);
@@ -64,6 +66,7 @@ const Navbar = () => {
   const getNavItems = () => {
     switch (userRole) {
       case 'mitra_budaya':
+      case 'CULTURAL_PARTNER':
         return [
           { href: '/cultural-partner/dashboard', label: 'Dashboard' },
           { href: '/cultural-partner/product', label: 'Product' },
@@ -71,12 +74,14 @@ const Navbar = () => {
           { href: '/cultural-partner/upload', label: 'Upload' }
         ];
       case 'pembeli_lisensi':
+      case 'LICENSE_BUYER':
         return [
           { href: '/product', label: 'Product' },
           { href: '/history', label: 'History' },
           { href: '/profile', label: 'Profile' }
         ];
       case 'admin_lumbung_rupa':
+      case 'ADMIN':
         return [
           { href: '/admin/approvals', label: 'Approvals' },
           { href: '/admin/profile', label: 'Profile' }

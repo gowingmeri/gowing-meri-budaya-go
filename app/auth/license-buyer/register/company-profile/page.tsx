@@ -33,9 +33,13 @@ const LicenseBuyerAuthRegisterCompanyProfilePage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Company profile submission:", formData);
-    // Navigate to next page
-    router.push("/auth/license-buyer/register/license-purchase-activation");
+    // save to localStorage
+    try {
+      localStorage.setItem('register_company_profile', JSON.stringify(formData));
+    } catch (err) {
+      console.warn('storage error', err);
+    }
+    router.push('/auth/license-buyer/register/license-purchase-activation');
   };
 
   return (
@@ -182,12 +186,12 @@ const LicenseBuyerAuthRegisterCompanyProfilePage = () => {
               </div>
 
               {/* Tombol Selanjutnya */}
-              <Link
-                href="/auth/license-buyer/register/license-purchase-activation"
+              <button
+                type="submit"
                 className="block w-full p-5 bg-primary text-white rounded-full font-medium shadow-sm hover:bg-primary transition-all duration-200 text-center"
               >
                 Selanjutnya
-              </Link>
+              </button>
             </form>
 
             {/* Navigation */}

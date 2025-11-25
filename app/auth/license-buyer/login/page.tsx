@@ -2,15 +2,54 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Toast from '../../../../components/Toast'
 
 const LicenseBuyerAuthLoginPage = () => {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showToast, setShowToast] = useState(false)
+  const [toastMessage, setToastMessage] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login attempt:", { email, password });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ message: res.statusText }))
+        alert('Login gagal: ' + (err.message || 'Unknown error'))
+        return
+      }
+
+      const data = await res.json()
+      const { user, token } = data
+      if (token) localStorage.setItem('token', token)
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('roleUser', user.role || '')
+      }
+
+      // show toast then redirect
+      setToastMessage('Berhasil masuk')
+      setShowToast(true)
+      setTimeout(() => {
+        if (user?.role === 'CULTURAL_PARTNER') {
+          router.push('/cultural-partner/dashboard')
+        } else {
+          router.push('/')
+        }
+      }, 900)
+    } catch (err) {
+      console.error(err)
+      alert('Terjadi kesalahan saat login. Cek konsol untuk detail.')
+    }
   };
 
   return (
@@ -175,6 +214,7 @@ const LicenseBuyerAuthLoginPage = () => {
               </Link>
             </div>
           </div>
+        {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
         </div>
       </div>
     </div>
