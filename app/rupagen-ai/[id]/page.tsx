@@ -14,6 +14,8 @@ import ChatSidebar from '@/components/ChatSidebar';
 import { Send, ArrowLeft } from 'lucide-react';
 import { Icon } from '@iconify/react';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
@@ -327,7 +329,7 @@ export default function ChatPage() {
                           message.content.startsWith('IMAGE:') ? (
                             <div className="mt-2 space-y-3">
                               <img
-                                src={`https://overcontentiously-recordless-chun.ngrok-free.dev${message.content.replace('IMAGE:', '')}`}
+                                src={`${API_BASE_URL}${message.content.replace('IMAGE:', '')}`}
                                 alt="Generated batik design"
                                 className="rounded-xl max-w-full h-auto shadow-lg"
                                 onError={(e) => {
