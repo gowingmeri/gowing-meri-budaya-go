@@ -25,8 +25,15 @@ export default function ChatPage() {
   const [sending, setSending] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // Load user role from localStorage
+    const role = localStorage.getItem('roleUser');
+    setUserRole(role);
+  }, []);
 
   useEffect(() => {
     if (titleId && titleId !== 'new') {
@@ -145,6 +152,20 @@ export default function ChatPage() {
     } finally {
       setGeneratingImage(false);
     }
+  }
+
+  function handleLicenseAsset(imageUrl: string) {
+    // Handle license for CULTURAL_PARTNER
+    console.log('Lisensikan aset:', imageUrl);
+    // TODO: Implement license logic
+    alert('Fitur lisensikan aset akan segera tersedia');
+  }
+
+  function handleBuyLicense(imageUrl: string) {
+    // Handle buy license for LICENSE_BUYER
+    console.log('Beli lisensi:', imageUrl);
+    // TODO: Implement buy license logic
+    alert('Fitur beli lisensi akan segera tersedia');
   }
 
   function handleKeyPress(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -288,16 +309,51 @@ export default function ChatPage() {
                       <div className="whitespace-pre-wrap wrap-break-word text-sm leading-relaxed">
                         {message.role === 'assistant' ? (
                           message.content.startsWith('IMAGE:') ? (
-                            <div className="mt-2">
+                            <div className="mt-2 space-y-3">
                               <img
                                 src={`https://overcontentiously-recordless-chun.ngrok-free.dev${message.content.replace('IMAGE:', '')}`}
-                                alt="Generated image"
+                                alt="Generated batik design"
                                 className="rounded-xl max-w-full h-auto shadow-lg"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
                                   e.currentTarget.parentElement!.innerHTML = '<p class="text-red-500 text-sm">Gagal memuat gambar</p>';
                                 }}
                               />
+                              {/* Action buttons based on user role */}
+                              {userRole && (
+                                <div className="flex gap-2 pt-2">
+                                  {userRole === 'CULTURAL_PARTNER' ? (
+                                    <button
+                                      onClick={() => handleLicenseAsset(message.content.replace('IMAGE:', ''))}
+                                      className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                                    >
+                                      <Icon icon="material-symbols:upload" className="text-lg" />
+                                      Lisensikan Aset Ini
+                                    </button>
+                                  ) : userRole === 'LICENSE_BUYER' ? (
+                                    <button
+                                      onClick={() => handleBuyLicense(message.content.replace('IMAGE:', ''))}
+                                      className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                                    >
+                                      <Icon icon="material-symbols:shopping-cart" className="text-lg" />
+                                      Beli Lisensi Aset Ini
+                                    </button>
+                                  ) : null}
+                                  {/* Download button for all users */}
+                                  {/* <button
+                                    onClick={() => {
+                                      const link = document.createElement('a');
+                                      link.href = `https://overcontentiously-recordless-chun.ngrok-free.dev${message.content.replace('IMAGE:', '')}`;
+                                      link.download = 'batik-design.png';
+                                      link.click();
+                                    }}
+                                    className="px-4 py-2.5 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                                    title="Download gambar"
+                                  >
+                                    <Icon icon="material-symbols:download" className="text-lg" />
+                                  </button> */}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             parseAssistantContent(message.content)
