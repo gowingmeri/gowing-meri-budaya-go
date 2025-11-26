@@ -415,7 +415,7 @@ const CulturalPartnerUploadPage = () => {
                       
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Resolusi/Ukuran
+                          Resolusi/Ukuran (Opsional)
                         </label>
                         <input
                           type="text"
@@ -457,7 +457,7 @@ const CulturalPartnerUploadPage = () => {
                       
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Signifikansi Budaya
+                          Pentancuman Informasi Lisensi
                         </label>
                         <textarea
                           name="culturalSignificance"

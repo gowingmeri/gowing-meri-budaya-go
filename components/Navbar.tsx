@@ -69,22 +69,24 @@ const Navbar = () => {
       case 'CULTURAL_PARTNER':
         return [
           { href: '/cultural-partner/dashboard', label: 'Dashboard' },
-          { href: '/cultural-partner/product', label: 'Product' },
-          { href: '/cultural-partner/profile', label: 'Profile' },
-          { href: '/cultural-partner/upload', label: 'Upload' }
+          { href: '/cultural-partner/product', label: 'Aset Saya' },
+          { href: '/cultural-partner/upload', label: 'Unggah Aset' },
+          { href: '/rupagen-ai', label: 'RupaGen AI' },
+          { href: '/cultural-partner/profile', label: 'Profil' }
         ];
       case 'pembeli_lisensi':
       case 'LICENSE_BUYER':
         return [
-          { href: '/product', label: 'Product' },
-          { href: '/history', label: 'History' },
-          { href: '/profile', label: 'Profile' }
+          { href: '/product', label: 'Semua Aset' },
+          { href: '/history', label: 'Riwayat Pembelian Lisensi' },
+          { href: '/rupagen-ai', label: 'RupaGen AI' },
+          { href: '/profile', label: 'Profil' }
         ];
       case 'admin_lumbung_rupa':
       case 'ADMIN':
         return [
-          { href: '/admin/approvals', label: 'Approvals' },
-          { href: '/admin/profile', label: 'Profile' }
+          { href: '/admin/approvals', label: 'Persetujuan' },
+          { href: '/admin/profile', label: 'Profil' }
         ];
       default:
         return [];
@@ -112,7 +114,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left - Logo */}
           <div className="flex-shrink-0">
@@ -125,8 +127,8 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-4">
             {userRole ? (
               <>
-                {/* Show cart only for pembeli_lisensi */}
-                {userRole === 'pembeli_lisensi' && (
+                {/* Show cart only for LICENSE_BUYER */}
+                {userRole === 'LICENSE_BUYER' && (
                   <Link href="/cart" className="relative p-2 text-gray-600 hover:text-primary transition-colors">
                     <ShoppingCart size={24} />
                     {cartItemCount > 0 && (
@@ -192,12 +194,12 @@ const Navbar = () => {
 
           {/* Mobile - Right side */}
           <div className="md:hidden flex items-center gap-2">
-            {/* Show cart only for pembeli_lisensi or guests */}
-            {(userRole === 'pembeli_lisensi' || !userRole) && (
+            {/* Show cart only for LICENSE_BUYER or guests */}
+            {(userRole === 'LICENSE_BUYER' || !userRole) && (
               <Link href="/cart" className="relative p-2 text-gray-600 hover:text-primary transition-colors">
                 <ShoppingCart size={20} />
                 {cartItemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                  <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                     {cartItemCount > 9 ? '9+' : cartItemCount}
                   </span>
                 )}

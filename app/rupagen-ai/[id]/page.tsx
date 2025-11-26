@@ -185,9 +185,25 @@ export default function ChatPage() {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
           <div className="px-4 lg:px-6 py-4 flex items-center gap-4">
+            {/* Back button - different routes based on role */}
             <button
-              onClick={() => router.push('/')}
-              className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              onClick={() => {
+                if (userRole === 'CULTURAL_PARTNER') {
+                  router.push('/cultural-partner/dashboard');
+                } else if (userRole === 'LICENSE_BUYER') {
+                  router.push('/product');
+                } else {
+                  router.push('/');
+                }
+              }}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title={
+                userRole === 'CULTURAL_PARTNER'
+                  ? 'Kembali ke Dashboard'
+                  : userRole === 'LICENSE_BUYER'
+                  ? 'Kembali ke Product'
+                  : 'Kembali ke Beranda'
+              }
             >
               <ArrowLeft size={20} className="text-gray-700" />
             </button>

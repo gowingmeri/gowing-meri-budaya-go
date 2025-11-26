@@ -12,6 +12,8 @@ const CulturalPartnerAuthLoginPage = () => {
   const [password, setPassword] = useState("");
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,31 +26,37 @@ const CulturalPartnerAuthLoginPage = () => {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ message: res.statusText }))
-        alert('Login gagal: ' + (err.message || 'Unknown error'))
+        setErrorMessage('Login gagal: ' + (err.message || 'Unknown error'))
+        setShowErrorModal(true)
         return
       }
 
       const data = await res.json()
       const { user, token } = data
+      
+      // Validate role - only CULTURAL_PARTNER allowed
+      if (user?.role !== 'CULTURAL_PARTNER') {
+        setErrorMessage('Akun ini bukan akun Mitra Budaya. Silakan gunakan halaman login yang sesuai dengan role Anda.')
+        setShowErrorModal(true)
+        return
+      }
+      
       if (token) localStorage.setItem('token', token)
       if (user) {
         localStorage.setItem('user', JSON.stringify(user))
-        localStorage.setItem('roleUser', user.role || '')
+        localStorage.setItem('roleUser', user.role)
       }
 
       // show toast then redirect
-      setToastMessage('Berhasil masuk')
+      setToastMessage('Berhasil masuk sebagai Mitra Budaya')
       setShowToast(true)
       setTimeout(() => {
-        if (user?.role === 'CULTURAL_PARTNER') {
-          router.push('/cultural-partner/dashboard')
-        } else {
-          router.push('/')
-        }
+        router.push('/cultural-partner/dashboard')
       }, 900)
     } catch (err) {
       console.error(err)
-      alert('Terjadi kesalahan saat login. Cek konsol untuk detail.')
+      setErrorMessage('Terjadi kesalahan saat login. Silakan coba lagi.')
+      setShowErrorModal(true)
     }
   };
 
@@ -216,6 +224,50 @@ const CulturalPartnerAuthLoginPage = () => {
           </div>
         </div>
         {showToast && <Toast message={toastMessage} onClose={() => setShowToast(false)} />}
+        
+        {/* Error Modal */}
+        {showErrorModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl transform transition-all">
+              <div className="flex flex-col items-center text-center">
+                {/* Error Icon */}
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                  <svg
+                    className="w-8 h-8 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                
+                {/* Error Title */}
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Login Gagal
+                </h3>
+                
+                {/* Error Message */}
+                <p className="text-gray-600 mb-6">
+                  {errorMessage}
+                </p>
+                
+                {/* Close Button */}
+                <button
+                  onClick={() => setShowErrorModal(false)}
+                  className="w-full px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
